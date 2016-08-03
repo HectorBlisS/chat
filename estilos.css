@@ -1,0 +1,13 @@
+.chat{
+	display: none;
+}
+.mini{
+	display: inline;
+	width: 20px;
+	border-radius: 50%;
+}
+.caja{
+	overflow: scroll;
+	height: 100px;
+	width: 300px;
+}

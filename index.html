@@ -1,0 +1,108 @@
+<html>
+<head>
+	<title>Chat</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="estilos.css">
+</head>
+<body>
+
+<section class="chat">
+	<img id="perfil" src="">
+	<h1>Bienvenido </h1>
+	<div id="caja" class="caja"></div>
+	<input type="text" id="mensaje">
+	<button id="enviar">Enviar</button>
+	<button id="logout">Cerrar Sesión</button>
+</section>
+<section class="login">
+	<button id="entrar">Entrar</button>
+</section>
+
+
+
+
+
+
+<script   src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDnwldCMLDrsTYaXWhkH_uZq5w6yX5qw7U",
+    authDomain: "citnova-afa58.firebaseapp.com",
+    databaseURL: "https://citnova-afa58.firebaseio.com",
+    storageBucket: "citnova-afa58.appspot.com",
+  };
+  firebase.initializeApp(config);
+</script>
+
+<script type="text/javascript">
+// Get a reference to the database service
+  var database = firebase.database();
+  var chat = database.ref('chat');
+
+  $('#enviar').on('click',function(){
+  	var user = firebase.auth().currentUser;
+  	chat.push({
+  		nombre:user.displayName,
+  		link:user.photoURL,
+  		mensaje:$('#mensaje').val()
+  	});
+  	$('#mensaje').val("");
+  }); // aqui cierra el boton
+
+  chat.on('child_added', function(data) {
+  	console.log(data.val().mensaje);
+  	$('.caja').append('<img class="mini" src="'+data.val().link+'">');
+  	$('.caja').append('<span>'+data.val().nombre+' => '+data.val().mensaje+'</span><br>');
+  	$("#caja").animate({ scrollTop:$('.caja').height() },"fast");
+
+  });
+
+  //Aqui logueo al usuario
+
+  var provider = new firebase.auth.FacebookAuthProvider();
+
+
+$('#entrar').on('click',function(){
+  firebase.auth().signInWithPopup(provider).then(function(result) {
+  // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+  var token = result.credential.accessToken;
+  // The signed-in user info.
+  var user = result.user;
+  console.log(user);
+  $('.chat').show();
+  $('.login').hide();
+
+
+  // ...
+}).catch(function(error) {
+  console.log(error);
+});
+}); //aqui cierra el boton
+
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+  $('h1').append(user.displayName);
+  $('#perfil').attr('src',user.photoURL);
+  $('.chat').show();
+  $('.login').hide(); 
+} else {
+  $('.chat').hide();
+  $('.login').show();   }
+});
+
+$('#logout').on('click',function(){
+firebase.auth().signOut().then(function() {
+	$('.chat').hide();
+  	$('.login').show(); 
+  	$('h1').text('Bienvenido ');
+  }, 
+  	function(error) {
+console.log(error);
+});
+}); // aqui cierra el boton
+
+</script>
+</body>
+</html>
